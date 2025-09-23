@@ -1,154 +1,277 @@
-/* ====== General ====== */
-body {
-  font-family: Poppins, sans-serif;
-  background: #ffffff;
-  color: #ffffff;
+/* --- Variabel Warna --- */
+:root {
+  --blue-primary: #0d6efd;
+  --blue-dark: #0a58ca;
+  --blue-light: #cfe2ff;
+  --grey-light: #f8f9fa;
+  --grey-dark: #6c757d;
+  --text-dark: #212529;
+  --text-light: #ffffff;
+  --white: #ffffff;
+  --border-color: #dee2e6;
+  --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+/* --- Reset & Gaya Dasar --- */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Judul */
-h1, h2, h3 {
-  color: #001f3f; /* Navy */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--grey-light);
+  color: var(--text-dark);
+  line-height: 1.5;
 }
 
-/* Header */
+/* --- Header --- */
 header {
-  background-color: #001f3f; /* Navy */
-  color: white;
+  background-color: var(--blue-primary);
+  color: var(--text-light);
+  padding: 1.5rem 1rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Navbar */
-.navbar {
-  background-color: #003366; /* Dark Blue */
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.navbar-brand, .nav-link {
-  color: #ffffff !important;
+.header-content img {
+  max-height: 80px;
 }
 
-.nav-link:hover {
-  color: #7FDBFF !important; /* Light Blue */
+.header-text h1 {
+  font-size: 1.75rem;
+  margin: 0;
 }
 
-/* Card styling */
+.header-text h2, .header-text p {
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* --- Konten Utama --- */
+main {
+  max-width: 800px;
+  margin: 2rem auto 4rem; /* Tambah margin bawah agar footer tidak terlalu dekat */
+  padding: 0 1rem; /*a*/
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+/* --- Card --- */
 .card {
-  border: 1px solid #0074D9; /* Blue */
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
 }
 
 .card-header {
-  background-color: #003366; /* Dark Blue */
-  color: white;
-  border-bottom: 1px solid #0074D9; /* Blue */
-  border-radius: 8px 8px 0 0 !important;
+  padding: 1rem 1.5rem;
+  background-color: var(--grey-light);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Form styling */
-.form-control {
-  border: 1px solid #0074D9; /* Blue */
-  border-radius: 4px;
+.card-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
 }
 
-.form-control:focus {
-  border-color: #003366; /* Dark Blue */
-  box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+.card-body {
+  padding: 1.5rem;
 }
 
-/* Buttons */
-.btn-primary {
-  background-color: #0074D9; /* Blue */
-  border-color: #0074D9; /* Blue */
+.card-import {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.btn-primary:hover {
-  background-color: #003366; /* Dark Blue */
-  border-color: #003366; /* Dark Blue */
+/* --- Form --- */
+.form-group {
+  margin-bottom: 1rem;
 }
 
-.btn-secondary {
-  background-color: #7FDBFF; /* Light Blue */
-  border-color: #7FDBFF; /* Light Blue */
-  color: #001f3f; /* Navy */
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
-.btn-secondary:hover {
-  background-color: #0074D9; /* Blue */
-  border-color: #0074D9; /* Blue */
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.btn-warning {
-  background-color: #7FDBFF; /* Light Blue */
-  border-color: #7FDBFF; /* Light Blue */
-  color: #001f3f; /* Navy */
+.form-group input:focus {
+  outline: none;
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 0.2rem var(--blue-light);
+}
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.btn-warning:hover {
-  background-color: #0074D9; /* Blue */
-  border-color: #0074D9; /* Blue */
+.form-group select:focus {
+  outline: none;
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 0.2rem var(--blue-light);
 }
 
-.btn-danger {
-  background-color: #001f3f; /* Navy */
-  border-color: #001f3f; /* Navy */
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }
 
-.btn-danger:hover {
-  background-color: #003366; /* Dark Blue */
-  border-color: #003366; /* Dark Blue */
+/* --- Tombol --- */
+button {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
-/* Tabel */
+#btn-simpan {
+  background-color: var(--blue-primary);
+  color: var(--text-light);
+}
+#btn-simpan:hover {
+  background-color: var(--blue-dark);
+}
+
+#btn-reset {
+  background-color: var(--grey-dark);
+  color: var(--text-light);
+}
+#btn-reset:hover {
+  background-color: #5a6268;
+}
+
+/* Gaya untuk kontrol di atas tabel (search & export) */
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap; /* Agar responsif di layar kecil */
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-group {
+  flex-grow: 1; /* Agar search bar mengisi ruang */
+  margin-bottom: 0; /* Hapus margin bawah default dari form-group */
+}
+
+#btn-export {
+  background-color: #198754; /* Warna hijau */
+  color: var(--text-light);
+}
+#btn-export:hover {
+  background-color: #157347;
+}
+/* --- Tabel --- */
+.table-container {
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  font-size: 0.9rem; /* Mengatur ukuran font tabel agar lebih rapi */
 }
 
 table th, table td {
-  padding: 12px;
+  padding: 1rem;
+  text-align: left; /* Default rata kiri untuk semua kolom */
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle; /* Pastikan konten selaras di tengah secara vertikal */
+}
+
+/* Pengaturan lebar dan perataan kolom spesifik */
+table th:first-child, table td:first-child, /* Kolom # */
+table th:nth-child(3), table td:nth-child(3), /* Kolom NIM */
+table th:nth-child(4), table td:nth-child(4) { /* Kolom No. HP */
   text-align: center;
 }
 
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 30%; /* Membuat kolom Nama lebih lebar */
+}
+
+table th:last-child,
+table td:last-child {
+  width: 10%; /* Mengecilkan kolom Aksi */
+  text-align: center;
+}
+
+/* Tombol Aksi Ikon */
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem; /* Ukuran ikon */
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
 table th {
-  background-color: #003366; /* Dark Blue */
-  color: white;
+  background-color: var(--white);
   cursor: pointer;
   user-select: none;
 }
 
-table th:hover {
-  background-color: #001f3f; /* Navy */
+tbody tr:nth-child(even) {
+  background-color: var(--grey-light);
 }
 
-table.table-striped tbody tr:nth-of-type(odd) {
-  background-color: rgba(127, 219, 255, 0.1); /* Light Blue transparent */
+tbody tr:hover {
+  background-color: var(--blue-light);
 }
 
-/* Search box */
-#search {
-  padding: 10px;
-  width: 100%;
-  border: 1px solid #0074D9; /* Blue */
-  border-radius: 5px;
-  font-size: 16px;
+td:last-child {
+  /* display: flex; */
+  /* gap: 0.5rem; */
+  white-space: nowrap; /* Mencegah ikon turun baris */
 }
 
-#search:focus {
-  border-color: #003366; /* Dark Blue */
-  box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.25);
+.btn-icon:hover {
+  background-color: var(--blue-light);
 }
 
-/* Footer */
+/* --- Footer --- */
 footer {
-  background-color: #0050a1; /* Navy */
-  color: white;
-  margin-top: 50px;
-}
-
-/* Hover effects for table rows */
-.table-hover tbody tr:hover {
-  background-color: rgba(0, 116, 217, 0.1); /* Blue transparent */
+  background-color: #343a40;
+  color: var(--text-light);
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: 3rem;
 }
