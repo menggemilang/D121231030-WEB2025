@@ -19,11 +19,34 @@
         <h2>FAKULTAS TEKNIK</h2>
         <p>Sistem Manajemen Data Mahasiswa</p>
       </div>
+      <button type="button" id="btn-logout" class="btn btn-danger hidden">Logout</button>
     </div>
   </header>
 
+  <!-- BAGIAN LOGIN: Form untuk otentikasi pengguna -->
+  <div id="login-container">
+    <div class="card">
+      <div class="card-header">
+        <h3>Login Sistem</h3>
+      </div>
+      <div class="card-body">
+        <form id="form-login">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required placeholder="Masukkan username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" required placeholder="Masukkan password">
+          </div>
+          <button type="submit" id="btn-login" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- BAGIAN UTAMA: Berisi form input dan tabel data -->
-  <main>
+  <main class="hidden">
     <!-- KARTU FORM: Untuk membuat atau memperbarui data mahasiswa -->
     <div class="card">
       <div class="card-header">
@@ -71,8 +94,8 @@
           <input type="hidden" id="id">
 
           <div class="form-actions">
-            <button type="button" id="btn-reset">Reset</button>
-            <button type="submit" id="btn-simpan">Simpan</button>    
+            <button type="button" id="btn-reset" class="btn btn-secondary">Reset</button>
+            <button type="submit" id="btn-simpan" class="btn btn-success">Simpan</button>    
           </div>
         </form>
       </div>
@@ -90,7 +113,8 @@
             <input type="text" id="search" placeholder="Cari data mahasiswa...">
           </div>
           <div class="table-actions">
-            <button type="button" id="btn-export">Download Excel</button>
+            <button type="button" id="btn-export" class="btn btn-success">Download Excel</button>
+            <button type="button" id="btn-export-pdf" class="btn btn-danger">Download PDF</button>
           </div>
         </div>
         
@@ -122,14 +146,14 @@
         <p>Upload file .xlsx atau .xls dengan kolom berurutan: <strong>Nama, NIM, No. HP, Program Studi</strong>.</p>
         <div class="form-group">
           <input type="file" id="excel_file" accept=".xlsx, .xls">
-          <button type="button" id="btn-import">Import Data</button>
+          <button type="button" id="btn-import" class="btn btn-primary">Import Data</button>
         </div>
       </div>
     </div>
   </main>
   
   <!-- BAGIAN FOOTER -->
-  <footer>
+  <footer class="hidden">
     <p>&copy; 2025 Universitas Hasanuddin. Fakultas Teknik.</p>
     <p>Developed for Educational Purposes</p>
   </footer>
@@ -137,6 +161,10 @@
   <!-- SCRIPT: Menghubungkan ke file JavaScript untuk fungsionalitas CRUD -->
   <!-- Library untuk membaca file Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- Library untuk membuat PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="index.js"></script>
+  
 </body>
 </html>

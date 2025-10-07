@@ -1,273 +1,327 @@
-// --- KONFIGURASI & STATE ---
-const STORAGE_KEY = "crud_mahasiswa";
-let dataMahasiswa = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-let sortState = { column: "", direction: "asc" };
+document.addEventListener("DOMContentLoaded", () => {
+  // ------------------- PERSISTENSI DATA -------------------
+  const STORAGE_KEY = "crud_mahasiswa_unhas";
+  const loadData = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  const saveData = (list) => localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 
-// --- ELEMEN HTML ---
-const form = document.getElementById("form-mahasiswa");
-const elId = document.getElementById("id");
-const elNama = document.getElementById("nama");
-const elNim = document.getElementById("nim");
-const elNoHp = document.getElementById("no_hp");
-const elProgramStudi = document.getElementById("program_studi");
-const tbody = document.getElementById("tbody");
-const elSearch = document.getElementById("search");
-const tableHeader = document.querySelector("thead tr");
-const elExcelFile = document.getElementById("excel_file");
-const btnImport = document.getElementById("btn-import");
-const btnExport = document.getElementById("btn-export");
+  // ------------------- STATE APLIKASI -------------------
+  let data = loadData();
+  let autoId = data.length > 0 ? Math.max(...data.map(item => item.id)) + 1 : 1;
+  let sortConfig = { key: null, asc: true };
 
-// --- FUNGSI-FUNGSI UTAMA ---
+  // ------------------- ELEMENT HTML -------------------
+  const form = document.getElementById("form-mahasiswa");
+  const elId = document.getElementById("id");
+  const elNama = document.getElementById("nama");
+  const elNim = document.getElementById("nim");
+  const elNoHp = document.getElementById("no_hp");
+  const elProdi = document.getElementById("program_studi");
+  const tbody = document.getElementById("tbody");
+  const btnReset = document.getElementById("btn-reset");
+  const searchInput = document.getElementById("search");
+  const btnExport = document.getElementById("btn-export");
+  const btnExportPdf = document.getElementById("btn-export-pdf");
+  const excelFileInput = document.getElementById("excel_file");
+  const btnImport = document.getElementById("btn-import");
 
-/**
- * Fungsi utama untuk menampilkan data ke tabel.
- * Juga menangani pembaruan indikator sort dan filter.
- */
-function render() {
-  // 1. Terapkan filter pencarian
-  const searchTerm = elSearch.value.toLowerCase();
-  let dataToDisplay = dataMahasiswa.filter(mhs => 
-    mhs.nama.toLowerCase().includes(searchTerm) || 
-    mhs.nim.toLowerCase().includes(searchTerm) ||
-    (mhs.no_hp && mhs.no_hp.includes(searchTerm)) ||
-    mhs.program_studi.toLowerCase().includes(searchTerm)
-  );
+  // --- Elemen Login & Konten Utama ---
+  const loginContainer = document.getElementById("login-container");
+  const mainContent = document.querySelector("main");
+  const footerContent = document.querySelector("footer");
+  const formLogin = document.getElementById("form-login");
+  const elUsername = document.getElementById("username");
+  const elPassword = document.getElementById("password");
+  const btnLogout = document.getElementById("btn-logout");
 
-  // 2. Terapkan pengurutan (sorting)
-  if (sortState.column) {
-    dataToDisplay.sort((a, b) => {
-      const valA = a[sortState.column].toString().toLowerCase();
-      const valB = b[sortState.column].toString().toLowerCase();
-      const direction = sortState.direction === "asc" ? 1 : -1;
-      if (valA < valB) return -1 * direction;
-      if (valA > valB) return 1 * direction;
-      return 0;
-    });
+  // ------------------- LOGIKA LOGIN & LOGOUT -------------------
+  const hardcodedUsername = "admin";
+  const hardcodedPassword = "password123";
+
+  function showMainContent() {
+    loginContainer.classList.add("hidden");
+    mainContent.classList.remove("hidden");
+    footerContent.classList.remove("hidden");
+    btnLogout.classList.remove("hidden");
   }
 
-  // 3. Update indikator panah di header tabel
-  tableHeader.querySelectorAll("th[data-sort]").forEach(th => {
-    const col = th.dataset.sort;
-    const name = col.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
-    if (col === sortState.column) {
-      th.textContent = `${name} ${sortState.direction === "asc" ? "↑" : "↓"}`;
+  function showLogin() {
+    loginContainer.classList.remove("hidden");
+    mainContent.classList.add("hidden");
+    footerContent.classList.add("hidden");
+    btnLogout.classList.add("hidden");
+    sessionStorage.removeItem("isLoggedIn");
+    formLogin.reset();
+  }
+
+  formLogin.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = elUsername.value.trim();
+    const password = elPassword.value.trim();
+
+    if (username === hardcodedUsername && password === hardcodedPassword) {
+      sessionStorage.setItem("isLoggedIn", "true");
+      showMainContent();
     } else {
-      th.textContent = `${name} ↕`;
+      alert("Login Gagal! Username atau password salah.");
     }
   });
 
-  // 4. Render baris tabel menggunakan map().join() agar lebih ringkas
-  tbody.innerHTML = dataToDisplay.length > 0 
-    ? dataToDisplay.map((row, idx) => `
-        <tr>
-          <td>${idx + 1}</td>
-          <td>${row.nama}</td>
-          <td>${row.nim}</td>
-          <td>${row.no_hp || ''}</td>
-          <td>${row.program_studi}</td>
-          <td class="kolom-aksi">
-            <button type="button" class="btn-icon" data-action="edit" data-id="${row.id}" title="Edit">✏️</button>
-            <button type="button" class="btn-icon" data-action="delete" data-id="${row.id}" title="Hapus">🗑️</button>
-          </td>
-        </tr>
-      `).join('')
-    : `<tr><td colspan="6" style="text-align: center;">Data tidak ditemukan</td></tr>`;
-}
+  btnLogout.addEventListener("click", showLogin);
 
-/**
- * Menyimpan data ke localStorage dan me-render ulang tabel.
- */
-function saveAndRender() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataMahasiswa));
-  render();
-}
-
-// --- EVENT HANDLERS (Penanganan Aksi Pengguna) ---
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const id = elId.value;
-  const nama = elNama.value.trim();
-  const nim = elNim.value.trim();
-  const noHp = elNoHp.value.trim();
-  const programStudi = elProgramStudi.value;
-
-  if (!nama || !nim || !programStudi || !noHp) {
-    return alert("Semua field wajib diisi!");
-  }
-
-  if (!/^\d+$/.test(noHp)) {
-    return alert("Nomor HP hanya boleh berisi angka.");
-  }
-
-  if (id) { // Mode Edit
-    const index = dataMahasiswa.findIndex(mhs => mhs.id == id);
-    if (index > -1) {
-      dataMahasiswa[index] = { ...dataMahasiswa[index], nama, nim, no_hp: noHp, program_studi: programStudi };
-    }
-  } else { // Mode Tambah
-    const newId = dataMahasiswa.length > 0 ? Math.max(...dataMahasiswa.map(mhs => mhs.id)) + 1 : 1;
-    dataMahasiswa.push({ id: newId, nama, nim, no_hp: noHp, program_studi: programStudi });
-  }
-
-  form.reset();
-  elId.value = '';
-  elNama.focus();
-  saveAndRender();
-});
-
-document.getElementById("btn-reset").addEventListener("click", () => {
-  form.reset();
-  elId.value = '';
-  elNama.focus();
-});
-
-elSearch.addEventListener("input", render);
-
-tableHeader.addEventListener("click", (e) => {
-  const column = e.target.dataset.sort;
-  if (!column) return;
-
-  if (sortState.column === column) {
-    sortState.direction = sortState.direction === "asc" ? "desc" : "asc";
+  // Cek status login saat halaman dimuat
+  if (sessionStorage.getItem("isLoggedIn") === "true") {
+    showMainContent();
   } else {
-    sortState.column = column;
-    sortState.direction = "asc";
+    showLogin();
   }
-  render();
-});
 
-tbody.addEventListener("click", (e) => {
-  const action = e.target.dataset.action;
-  const id = e.target.dataset.id;
-  if (!action || !id) return;
+  // ------------------- FUNGSI RENDER TABEL -------------------
+  function render(filterQuery = "") {
+    if (!Array.isArray(data)) data = [];
 
-  if (action === "edit") {
-    const mhs = dataMahasiswa.find(m => m.id == id);
-    if (mhs) {
-      elId.value = mhs.id;
-      elNama.value = mhs.nama;
-      elNim.value = mhs.nim;
-      elNoHp.value = mhs.no_hp || '';
-      elProgramStudi.value = mhs.program_studi;
-      elNama.focus();
+    let filteredData = data;
+    if (filterQuery) {
+      const query = filterQuery.toLowerCase();
+      filteredData = data.filter(item =>
+        item.nama.toLowerCase().includes(query) ||
+        item.nim.toLowerCase().includes(query) ||
+        item.no_hp.toLowerCase().includes(query) ||
+        item.program_studi.toLowerCase().includes(query)
+      );
     }
-  }
 
-  if (action === "delete") {
-    if (confirm(`Yakin ingin menghapus data ini?`)) {
-      dataMahasiswa = dataMahasiswa.filter(m => m.id != id);
-      saveAndRender();
+    // Sorting
+    if (sortConfig.key) {
+      filteredData.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.asc ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.asc ? 1 : -1;
+        return 0;
+      });
     }
-  }
-});
 
-// --- FUNGSI IMPORT EXCEL ---
-
-/**
- * Menangani proses import data dari file Excel.
- */
-function handleImport() {
-  const file = elExcelFile.files[0];
-  if (!file) {
-    alert("Silakan pilih file Excel terlebih dahulu.");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      
-      // Mengubah sheet menjadi array of arrays, mengabaikan header
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
-
-      let lastId = dataMahasiswa.length > 0 ? Math.max(...dataMahasiswa.map(mhs => mhs.id)) : 0;
-
-      const newData = jsonData.map((row, index) => {
-        // Pastikan baris memiliki data yang cukup
-        if (row.length < 4 || !row[0] || !row[1] || !row[2] || !row[3]) return null;
-        return {
-          id: ++lastId,
-          nama: row[0],
-          nim: String(row[1]),
-          no_hp: String(row[2]),
-          program_studi: row[3]
-        };
-      }).filter(Boolean); // Menghapus baris null/invalid
-
-      dataMahasiswa.push(...newData);
-      saveAndRender();
-      alert(`${newData.length} data berhasil diimpor!`);
-    } catch (error) {
-      console.error("Error saat memproses file Excel:", error);
-      alert("Terjadi kesalahan saat memproses file. Pastikan format file dan kolom sudah benar.");
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-// --- FUNGSI EXPORT EXCEL ---
-
-/**
- * Menangani proses ekspor data yang ditampilkan di tabel ke file Excel.
- */
-function handleExport() {
-  // 1. Ambil data yang sedang ditampilkan (sudah difilter dan diurutkan)
-  const searchTerm = elSearch.value.toLowerCase();
-  let dataToExport = dataMahasiswa.filter(mhs => 
-    mhs.nama.toLowerCase().includes(searchTerm) || 
-    mhs.nim.toLowerCase().includes(searchTerm) ||
-    (mhs.no_hp && mhs.no_hp.includes(searchTerm)) ||
-    mhs.program_studi.toLowerCase().includes(searchTerm)
-  );
-
-  if (sortState.column) {
-    dataToExport.sort((a, b) => {
-      const valA = a[sortState.column].toString().toLowerCase();
-      const valB = b[sortState.column].toString().toLowerCase();
-      const direction = sortState.direction === "asc" ? 1 : -1;
-      if (valA < valB) return -1 * direction;
-      if (valA > valB) return 1 * direction;
-      return 0;
+    tbody.innerHTML = "";
+    filteredData.forEach((row, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${row.nama}</td>
+        <td>${row.nim}</td>
+        <td>${row.no_hp}</td>
+        <td>${row.program_studi}</td>
+        <td>
+          <button type="button" class="btn-edit" data-edit="${row.id}">Edit</button>
+          <button type="button" class="btn-del" data-del="${row.id}">Hapus</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
   }
 
-  if (dataToExport.length === 0) {
-    alert("Tidak ada data untuk diekspor.");
-    return;
-  }
+  // ------------------- FORM SUBMIT (CREATE / UPDATE) -------------------
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-  // 2. Siapkan data untuk worksheet (array dari array)
-  const header = ["#", "Nama", "NIM", "No. HP", "Program Studi"];
-  const dataForSheet = dataToExport.map((row, idx) => [
-    idx + 1,
-    row.nama,
-    row.nim,
-    row.no_hp || '',
-    row.program_studi
-  ]);
+    const idVal = elId.value.trim();
+    const newEntry = {
+      nama: elNama.value.trim(),
+      nim: elNim.value.trim(),
+      no_hp: elNoHp.value.trim(),
+      program_studi: elProdi.value,
+    };
 
-  // 3. Buat worksheet dan workbook
-  const worksheet = XLSX.utils.aoa_to_sheet([header, ...dataForSheet]);
-  
-  // Atur lebar kolom agar lebih rapi
-  worksheet['!cols'] = [ { wch: 5 }, { wch: 30 }, { wch: 15 }, { wch: 20 }, { wch: 25 } ];
+    if (!newEntry.nama || !newEntry.nim || !newEntry.program_studi) {
+      return alert("Nama, NIM, dan Program Studi wajib diisi.");
+    }
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Data Mahasiswa");
+    if (idVal) { // UPDATE
+      const idNum = Number(idVal);
+      const idx = data.findIndex(x => x.id === idNum);
+      if (idx > -1) {
+        data[idx] = { ...data[idx], ...newEntry };
+      }
+    } else { // CREATE
+      // Cek duplikat NIM sebelum menambah data baru
+      if (data.some(item => item.nim === newEntry.nim)) {
+        return alert(`Error: NIM ${newEntry.nim} sudah terdaftar.`);
+      }
+      newEntry.id = autoId++;
+      data.push(newEntry);
+    }
 
-  // 4. Hasilkan file dan picu unduhan
-  const today = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(workbook, `Data_Mahasiswa_${today}.xlsx`);
-}
+    saveData(data);
+    render(searchInput.value);
+    form.reset();
+    elId.value = "";
+    elNama.focus();
+  });
 
-btnImport.addEventListener("click", handleImport);
-btnExport.addEventListener("click", handleExport);
+  // ------------------- RESET FORM -------------------
+  btnReset.addEventListener("click", () => {
+    form.reset();
+    elId.value = "";
+    elNama.focus();
+  });
 
-// --- INISIALISASI ---
-// Panggil render() saat halaman pertama kali dimuat.
-render();
+  // ------------------- HANDLER TOMBOL EDIT / HAPUS -------------------
+  tbody.addEventListener("click", (e) => {
+    const editId = e.target.getAttribute("data-edit");
+    const delId = e.target.getAttribute("data-del");
+
+    if (editId) { // EDIT
+      const item = data.find(x => x.id === Number(editId));
+      if (item) {
+        elId.value = item.id;
+        elNama.value = item.nama;
+        elNim.value = item.nim;
+        elNoHp.value = item.no_hp;
+        elProdi.value = item.program_studi;
+        elNama.focus();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    if (delId) { // DELETE
+      const idNum = Number(delId);
+      if (confirm("Yakin hapus data ini?")) {
+        data = data.filter(x => x.id !== idNum);
+        saveData(data);
+        render(searchInput.value);
+      }
+    }
+  });
+
+  // ------------------- PENCARIAN & SORTING -------------------
+  searchInput.addEventListener("input", () => render(searchInput.value));
+
+  document.querySelector("thead").addEventListener("click", (e) => {
+    const sortKey = e.target.dataset.sort;
+    if (sortKey) {
+      if (sortConfig.key === sortKey) {
+        sortConfig.asc = !sortConfig.asc;
+      } else {
+        sortConfig.key = sortKey;
+        sortConfig.asc = true;
+      }
+      render(searchInput.value);
+    }
+  });
+
+  // ------------------- EKSPOR DATA -------------------
+  // Fungsi helper untuk mendapatkan data yang sudah difilter sesuai pencarian
+  const getFilteredData = () => {
+    const filterQuery = searchInput.value;
+    if (!filterQuery) {
+      return data; // Jika tidak ada pencarian, kembalikan semua data
+    }
+    const query = filterQuery.toLowerCase();
+    return data.filter(item =>
+      item.nama.toLowerCase().includes(query) ||
+      item.nim.toLowerCase().includes(query) ||
+      item.no_hp.toLowerCase().includes(query) ||
+      item.program_studi.toLowerCase().includes(query)
+    );
+  };
+
+  btnExport.addEventListener("click", () => {
+    const dataToExport = getFilteredData(); // Ambil data yang sudah difilter
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Mahasiswa");
+    XLSX.writeFile(wb, "data_mahasiswa.xlsx");
+  });
+
+  btnExportPdf.addEventListener("click", () => {
+    const dataToExport = getFilteredData(); // Ambil data yang sudah difilter
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.autoTable({
+      head: [['#', 'Nama', 'NIM', 'No. HP', 'Program Studi']],
+      body: dataToExport.map((item, i) => [i + 1, item.nama, item.nim, item.no_hp, item.program_studi]),
+    });
+
+    doc.save('data_mahasiswa.pdf');
+  });
+
+  // ------------------- IMPOR DATA DARI EXCEL -------------------
+  btnImport.addEventListener("click", () => {
+    if (!excelFileInput.files.length) {
+      return alert("Silakan pilih file Excel terlebih dahulu.");
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const fileData = event.target.result;
+        const workbook = XLSX.read(fileData, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const excelData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        // Hapus header jika ada
+        const header = excelData[0].map(h => h.toString().toLowerCase());
+        if (header.includes('nama') || header.includes('nim')) {
+          excelData.shift();
+        }
+
+        // Buat Set dari NIM yang sudah ada untuk pengecekan duplikat yang lebih cepat
+        const existingNIMs = new Set(data.map(d => d.nim));
+
+        const newData = [];
+        const duplicateNIMs = [];
+
+        excelData.forEach(row => {
+          if (row.length < 4) return; // Lewati baris yang tidak lengkap
+
+          const nim = row[1] ? row[1].toString().trim() : '';
+          
+          // Cek duplikat di data yang sudah ada ATAU di data yang baru akan diimpor
+          // Pencarian di 'existingNIMs' jauh lebih cepat daripada .some() pada array besar
+          if (nim && !existingNIMs.has(nim)) {
+            newData.push({
+              id: autoId++,
+              nama: row[0] ? row[0].toString().trim() : '',
+              nim: nim,
+              no_hp: row[2] ? row[2].toString().trim() : '',
+              program_studi: row[3] ? row[3].toString().trim() : '',
+            });
+            existingNIMs.add(nim); // Tambahkan NIM baru ke Set agar tidak ada duplikat dalam file yang sama
+          } else if (nim) { // Jika NIM ada tapi sudah duplikat
+            duplicateNIMs.push(nim);
+          }
+        });
+
+        if (newData.length > 0) {
+          data.push(...newData);
+          saveData(data);
+          render(searchInput.value);
+        }
+
+        // Tampilkan alert hasil import
+        let alertMessage = "";
+        if (newData.length > 0) {
+          alertMessage += `${newData.length} data baru berhasil diimpor.\n`;
+        } else {
+          alertMessage += "Tidak ada data baru yang diimpor.\n";
+        }
+
+        if (duplicateNIMs.length > 0) {
+          alertMessage += `${duplicateNIMs.length} data duplikat ditemukan dan diabaikan (NIM: ${duplicateNIMs.join(', ')}).`;
+        }
+
+        alert(alertMessage);
+
+      } catch (error) {
+        console.error("Error saat memproses file Excel:", error);
+        alert("Terjadi kesalahan saat membaca file. Pastikan format file benar.");
+      } finally {
+        excelFileInput.value = ""; // Reset input file
+      }
+    };
+
+    reader.readAsBinaryString(excelFileInput.files[0]);
+  });
+
+  // ------------------- INIT -------------------
+  render();
+});
